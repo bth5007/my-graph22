@@ -19,11 +19,20 @@ def load_data():
 df = pd.read_csv(DATA_URL)
 
 ```
-# 장르에 세로막대(|)로 여러 장르가 적혀 있다면 첫 번째 장르만 사용
-df["genre"] = df["genre"].fillna("").astype(str).str.split("|").str[0].str.strip()
+# 여러 장르가 "|"로 구분되어 있으면 첫 번째 장르만 사용
+df["genre"] = (
+    df["genre"]
+    .fillna("")
+    .astype(str)
+    .str.split("|")
+    .str[0]
+    .str.strip()
+)
 
 return df
 ```
+
+# 데이터 불러오기
 
 try:
 df = load_data()
@@ -58,6 +67,8 @@ df["genre"]
 
 genre_counts.columns = ["genre", "count"]
 
+# 도넛 그래프
+
 fig = px.pie(
 genre_counts,
 names="genre",
@@ -68,7 +79,12 @@ title="장르별 영화 편수",
 
 fig.update_traces(
 textinfo="percent",
-hovertemplate="<b>%{label}</b><br>편수: %{value}편<br>비율: %{percent}<extra></extra>",
+hovertemplate=(
+"<b>%{label}</b><br>"
+"편수: %{value}편<br>"
+"비율: %{percent}"
+"<extra></extra>"
+),
 )
 
 fig.update_layout(
@@ -78,21 +94,9 @@ margin=dict(t=60, b=20, l=20, r=20),
 
 st.plotly_chart(fig, use_container_width=True)
 
-with st.container(border=True):
-st.markdown("### 💡 이 그래프로 알 수 있는 것")
-st.write("여기에 장르별 영화 편수와 비율을 보고 알 수 있는 내용을 한 문장으로 적어 보세요.")
-
-# ---------------------------------------------------------
-
-# 이후 그래프를 추가할 때 사용할 구역
-
-# ---------------------------------------------------------
-
-st.divider()
-st.header("2. 다음 그래프")
-
-st.info("이곳에 두 번째 그래프를 추가할 수 있습니다.")
+# 그래프 해석 작성 공간
 
 with st.container(border=True):
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
-st.write("여기에 이 그래프를 통해 알 수 있는 내용을 한 문장으로 적어 보세요.")
+st.write(
+"여기에 장르별 영화 편
