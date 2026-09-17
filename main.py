@@ -20,8 +20,9 @@ def load_data():
     # 1. 개봉일(openDt) 날짜 형식을 YYYY-MM-DD 형태로 변환
     df['openDt'] = pd.to_datetime(df['openDt'].astype(str), format='%Y%m%d', errors='coerce')
     
-    # 2. 장르(genre) 세로막대 기호(|)로 여러 개 기재된 경우 첫 번째 장르만 추출
-    df['primary_genre'] = df['genre'].astype(str).apply(lambda x: x.split('|')[0].strip() if x != 'nan' else '기타')
+    # 2. 장르(genre) 처리: str.split('|')을 사용하여 첫 번째 장르만 추출 후 결측치는 '기타'로 채움
+    df['primary_genre'] = df['genre'].astype(str).str.split('|').str[0].str.strip()
+    df['primary_genre'] = df['primary_genre'].replace(['nan', 'None', ''], '기타').fillna('기타')
     
     return df
 
