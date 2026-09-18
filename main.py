@@ -85,3 +85,37 @@ st.plotly_chart(fig2, use_container_width=True)
 
 # 구분선 및 인사이트 섹션
 st.info("**이 그래프로 알 수 있는 것:** 각 장르 내에서 어떤 영화가 흥행을 주도했는지, 장르 전체 관객수 대비 개별 영화의 관객수 비중을 한눈에 파악할 수 있습니다.")
+
+st.divider()
+
+# -------------------------------------------------------------------
+# 3. 총 관객수 분포 (플롯리 히스토그램)
+# -------------------------------------------------------------------
+st.subheader("3. 총 관객수(total_audi) 분포")
+
+# Plotly 히스토그램 생성
+fig3 = px.histogram(
+    df,
+    x='total_audi',
+    nbins=30,
+    title="영화별 총 관객수 히스토그램",
+    labels={'total_audi': '총 관객수(명)', 'count': '영화 수'}
+)
+
+fig3.update_traces(
+    hovertemplate="<b>관객수 구간: %{x:,.0f}명</b><br>해당 구간 영화 수: %{y}편<extra></extra>"
+)
+
+# Streamlit에 그래프 출력
+st.plotly_chart(fig3, use_container_width=True)
+
+# 가장 관객이 많은 영화 정보 추출
+top_movie = df.loc[df['total_audi'].idxmax()]
+top_movie_name = top_movie['movieNm']
+top_movie_audi = top_movie['total_audi']
+
+# 인사이트 및 분석 문구 출력
+st.info(
+    f"**이 그래프로 알 수 있는 것:** большинство의 영화는 **100만~300만 명 이하의 구간**에 대다수 밀집해 있는 롱테일 분포 양상을 보입니다. "
+    f"또한, 본 데이터셋에서 가장 관객이 많은 영화는 **'{top_movie_name}'**(약 {top_movie_audi:,.0f}명)입니다."
+)
