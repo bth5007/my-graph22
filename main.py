@@ -24,6 +24,10 @@ def load_data():
     df['primary_genre'] = df['genre'].astype(str).str.split('|').str[0].str.strip()
     df['primary_genre'] = df['primary_genre'].replace(['nan', 'None', ''], '기타').fillna('기타')
     
+    # 3. 제작 국가(nation) 결측치 및 빈 문자열 처리
+    df['nation'] = df['nation'].fillna('기타국가').astype(str).str.strip()
+    df['nation'] = df['nation'].replace('', '기타국가')
+    
     return df
 
 # 데이터 로드
@@ -202,12 +206,6 @@ st.divider()
 st.subheader("7. 제작 국가 및 장르 계층 구조")
 
 sunburst_df = df.copy()
-sunburst_df['nation'] = sunburst_df['nation'].fillna('기타국가').astype(str).str.strip()
-sunburst_df['primary_genre'] = sunburst_df['primary_genre'].fillna('기타장르').astype(str).str.strip()
-
-sunburst_df['nation'] = sunburst_df['nation'].replace('', '기타국가')
-sunburst_df['primary_genre'] = sunburst_df['primary_genre'].replace('', '기타장르')
-
 sunburst_grouped = (
     sunburst_df.groupby(['nation', 'primary_genre'])
     .size()
@@ -232,28 +230,22 @@ st.info("**이 그래프로 알 수 있는 것:** 제작 국가별 영화 생산
 st.divider()
 
 # -------------------------------------------------------------------
-# 8. 10위권 체류 일수와 총 관객수의 관계 (산점도)
+# 8. 제작 국가별 영화 편수의 비율 (트리맵)
 # -------------------------------------------------------------------
-st.subheader("8. 10위권 체류 일수와 총 관객수의 관계")
+st.subheader("8. 제작 국가별 영화 편수의 비율은 어떠한가")
 
-fig8 = px.scatter(
+fig8 = px.treemap(
     df,
-    x='days_in_top10',
-    y='total_audi',
-    color='primary_genre',
-    hover_name='movieNm',
-    title="10위권에 오래 머문 영화는 총 관객도 많은가",
-    labels={
-        'days_in_top10': '10위권에 머문 날수(일)',
-        'total_audi': '총 관객수(명)',
-        'primary_genre': '장르'
-    }
+    path=['nation', 'movieNm'],
+    values='total_audi',
+    color='nation',
+    title="제작 국가별 영화 편수의 비율은 어떠한가"
 )
 
 fig8.update_traces(
-    hovertemplate="<b>%{hovertext}</b><br>10위권 머문 날수: %{x}일<br>총 관객수: %{y:,.0f}명<extra></extra>"
+    hovertemplate="<b>영화명/국가: %{label}</b><br>총 관객수: %{value:,.0f}명<br>비율: %{percentRoot:.1%}<extra></extra>"
 )
 
 st.plotly_chart(fig8, use_container_width=True)
 
-st.info("**이 그래프로 알 수 있는 것:** 10위권에 장기 집권한 일수와 최종 획득한 총 관객수 사이에 강한 양의 상관관계가 존재하는지 파악할 수 있습니다.")
+st.info("**이 그래프로 알 수 있는 것:** 국가별 전체 관객 시장 규모 비중과 각 국가를 대표하는 개별 영화가 전체 시장에서 차지하는 비율을 한눈에 파악할 수 있습니다.")
