@@ -202,9 +202,26 @@ st.divider()
 # -------------------------------------------------------------------
 st.subheader("7. 제작 국가 및 장르 계층 구조")
 
+# 결측치 정제 및 국가-장르별 영화 편수 집계
+sunburst_df = df.copy()
+sunburst_df['nation'] = sunburst_df['nation'].fillna('기타국가').astype(str).str.strip()
+sunburst_df['primary_genre'] = sunburst_df['primary_genre'].fillna('기타장르').astype(str).str.strip()
+
+# 빈 문자열 처리
+sunburst_df['nation'] = sunburst_df['nation'].replace('', '기타국가')
+sunburst_df['primary_genre'] = sunburst_df['primary_genre'].replace('', '기타장르')
+
+# 국가 및 장르별로 영화 편수 수량 집계
+sunburst_grouped = (
+    sunburst_df.groupby(['nation', 'primary_genre'])
+    .size()
+    .reset_index(name='count')
+)
+
 fig7 = px.sunburst(
-    df,
+    sunburst_grouped,
     path=['nation', 'primary_genre'],
+    values='count',
     title="제작 국가 -> 장르 계층별 영화 편수 선버스트 차트"
 )
 
