@@ -139,7 +139,6 @@ st.divider()
 # -------------------------------------------------------------------
 st.subheader("5. 주요 장르별 총 관객수 분포 (10편 이상 장르)")
 
-# 영화 편수가 10편 이상인 장르만 필터링
 genre_counts_series = df['primary_genre'].value_counts()
 target_genres = genre_counts_series[genre_counts_series >= 10].index
 df_filtered_box = df[df['primary_genre'].isin(target_genres)]
@@ -150,7 +149,7 @@ fig5 = px.box(
     y='total_audi',
     color='primary_genre',
     hover_name='movieNm',
-    points='outliers',  # 이상치 점 표시
+    points='outliers',
     title="영화 10편 이상 주요 장르별 총 관객수 박스플롯",
     labels={'primary_genre': '장르', 'total_audi': '총 관객수(명)'}
 )
@@ -202,16 +201,13 @@ st.divider()
 # -------------------------------------------------------------------
 st.subheader("7. 제작 국가 및 장르 계층 구조")
 
-# 결측치 정제 및 국가-장르별 영화 편수 집계
 sunburst_df = df.copy()
 sunburst_df['nation'] = sunburst_df['nation'].fillna('기타국가').astype(str).str.strip()
 sunburst_df['primary_genre'] = sunburst_df['primary_genre'].fillna('기타장르').astype(str).str.strip()
 
-# 빈 문자열 처리
 sunburst_df['nation'] = sunburst_df['nation'].replace('', '기타국가')
 sunburst_df['primary_genre'] = sunburst_df['primary_genre'].replace('', '기타장르')
 
-# 국가 및 장르별로 영화 편수 수량 집계
 sunburst_grouped = (
     sunburst_df.groupby(['nation', 'primary_genre'])
     .size()
@@ -232,3 +228,32 @@ fig7.update_traces(
 st.plotly_chart(fig7, use_container_width=True)
 
 st.info("**이 그래프로 알 수 있는 것:** 제작 국가별 영화 생산 비중과 각 국가 내에서 주력을 이루는 영화 장르의 비율 구조를 계층적으로 파악할 수 있습니다.")
+
+st.divider()
+
+# -------------------------------------------------------------------
+# 8. 10위권 체류 일수와 총 관객수의 관계 (산점도)
+# -------------------------------------------------------------------
+st.subheader("8. 10위권 체류 일수와 총 관객수의 관계")
+
+fig8 = px.scatter(
+    df,
+    x='days_in_top10',
+    y='total_audi',
+    color='primary_genre',
+    hover_name='movieNm',
+    title="10위권에 오래 머문 영화는 총 관객도 많은가",
+    labels={
+        'days_in_top10': '10위권에 머문 날수(일)',
+        'total_audi': '총 관객수(명)',
+        'primary_genre': '장르'
+    }
+)
+
+fig8.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>10위권 머문 날수: %{x}일<br>총 관객수: %{y:,.0f}명<extra></extra>"
+)
+
+st.plotly_chart(fig8, use_container_width=True)
+
+st.info("**이 그래프로 알 수 있는 것:** 10위권에 장기 집권한 일수와 최종 획득한 총 관객수 사이에 강한 양의 상관관계가 존재하는지 파악할 수 있습니다.")
